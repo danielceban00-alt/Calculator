@@ -1,0 +1,21 @@
+# NetBeans
+nbproject/private/
+build/
+dist/
+nbbuild/
+nbdist/
+.nb-gradle/
+
+# Compiled class files
+*.class
+
+# SQLite database / save files
+*.db
+*.db-journal
+
+# OS junk files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
