@@ -18,6 +18,8 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
 /**
@@ -39,6 +41,10 @@ public class Calculator extends Application {
         {".", "0", "=", "+"}
     };
 
+    double firstNumber;
+    double result;
+    String operator;
+
     @Override
     public void start(Stage primaryStage) {
 
@@ -48,7 +54,17 @@ public class Calculator extends Application {
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(15));
+
         display = new TextField();
+        display.setFont(Font.font(
+                "Consolas",
+                FontWeight.BOLD,
+                42
+        ));
+        display.setPadding(
+                new Insets(10, 18, 10, 18)
+        );
+        display.setFocusTraversable(false);
 
         display.setEditable(false);
         display.setStyle(
@@ -79,6 +95,130 @@ public class Calculator extends Application {
                 Button button = new Button(
                         buttonText[row][column]
                 );
+
+                button.setOnAction(e -> {
+                    String pressed = button.getText();
+
+                    if (pressed.matches("[0-9]")
+                            && display.getText().length() < 12) {
+
+                        display.appendText(pressed);
+                    }
+
+                    if (pressed.equals(".")
+                            && !display.getText().contains(".")) {
+
+                        if (display.getText().isEmpty()) {
+                            display.setText("0.");
+                        } else {
+                            display.appendText(".");
+                        }
+                    }
+
+                    if (pressed.matches("[+−×÷]")
+                            && !display.getText().isEmpty()
+                            && operator == null) {
+
+                        firstNumber = Double.parseDouble(
+                                display.getText()
+                        );
+
+                        operator = pressed;
+
+                        display.clear();
+                    }
+
+                    if (pressed.equals("=")
+                            && operator != null
+                            && !display.getText().isEmpty()) {
+
+                        double secondNumber = Double.parseDouble(
+                                display.getText()
+                        );
+
+                        result = 0;
+
+                        switch (operator) {
+                            case "+":
+                                result = firstNumber + secondNumber;
+                                break;
+
+                            case "−":
+                                result = firstNumber - secondNumber;
+                                break;
+
+                            case "×":
+                                result = firstNumber * secondNumber;
+                                break;
+
+                            case "÷":
+                                result = firstNumber / secondNumber;
+                                break;
+                        }
+
+                        if (Double.isInfinite(result)
+                                || Double.isNaN(result)) {
+
+                            display.setFont(Font.font(
+                                    "Arial",
+                                    FontWeight.BOLD,
+                                    19
+                            ));
+
+                            display.setAlignment(Pos.CENTER);
+
+                            display.setText(
+                                    "why u tryna calculate that gng 😭🙏"
+                            );
+
+                        } else {
+
+                            display.setFont(Font.font(
+                                    "Consolas",
+                                    FontWeight.BOLD,
+                                    42
+                            ));
+
+                            display.setAlignment(Pos.CENTER_RIGHT);
+
+                            String resultText = String.valueOf(result);
+
+                            if (resultText.endsWith(".0")) {
+                                resultText = resultText.substring(
+                                        0,
+                                        resultText.length() - 2
+                                );
+                            }
+
+                            if (resultText.length() > 12) {
+                                display.setFont(Font.font(
+                                        "Consolas",
+                                        FontWeight.BOLD,
+                                        22
+                                ));
+                            } else if (resultText.length() > 8) {
+                                display.setFont(Font.font(
+                                        "Consolas",
+                                        FontWeight.BOLD,
+                                        30
+                                ));
+                            } else {
+                                display.setFont(Font.font(
+                                        "Consolas",
+                                        FontWeight.BOLD,
+                                        42
+                                ));
+                            }
+
+                            display.setAlignment(Pos.CENTER_RIGHT);
+                            display.setText(resultText);
+                            display.positionCaret(resultText.length());
+                        }
+
+                        operator = null;
+                    }
+
+                });
 
                 button.setPrefSize(75, 75);
 
