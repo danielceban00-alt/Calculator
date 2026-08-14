@@ -6,13 +6,18 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 public class Calculator extends Application {
 
@@ -34,10 +39,36 @@ public class Calculator extends Application {
     double result;
     String operator;
 
+    double dragOffsetX;
+    double dragOffsetY;
+
     @Override
     public void start(Stage primaryStage) {
 
+        primaryStage.initStyle(StageStyle.TRANSPARENT);
+
         root = new BorderPane();
+
+        root.setStyle(
+                "-fx-background-color: linear-gradient("
+                + "to bottom right,"
+                + "#5d6268 0%,"
+                + "#3c4147 45%,"
+                + "#262a2f 100%"
+                + ");"
+                + "-fx-background-radius: 28;"
+                + "-fx-border-color: #777c82 #1a1d20 #17191c #6d7278;"
+                + "-fx-border-width: 3 6 7 3;"
+                + "-fx-border-radius: 28;"
+                + "-fx-effect: dropshadow("
+                + "gaussian,"
+                + "rgba(0,0,0,0.75),"
+                + "22,"
+                + "0.25,"
+                + "0,"
+                + "10"
+                + ");"
+        );
 
         grid = new GridPane();
         grid.setAlignment(Pos.CENTER);
@@ -74,7 +105,70 @@ public class Calculator extends Application {
 
         display.setPrefHeight(100);
 
-        root.setTop(display);
+        HBox titleBar = new HBox();
+        titleBar.setAlignment(Pos.CENTER_RIGHT);
+        titleBar.setPadding(new Insets(8, 12, 5, 15));
+        titleBar.setSpacing(8);
+
+        javafx.scene.control.Label title
+                = new javafx.scene.control.Label("Calculator 3000");
+
+        title.setStyle(
+                "-fx-text-fill: #dddddd;"
+                + "-fx-font-size: 14px;"
+                + "-fx-font-weight: bold;"
+        );
+
+        Region titleSpace = new Region();
+        HBox.setHgrow(titleSpace, Priority.ALWAYS);
+
+        Button minimizeButton = new Button("−");
+        Button closeButton = new Button("×");
+
+        minimizeButton.setPrefSize(34, 27);
+        closeButton.setPrefSize(34, 27);
+
+        minimizeButton.setStyle(
+                "-fx-background-color: #444444;"
+                + "-fx-text-fill: white;"
+                + "-fx-font-size: 15px;"
+                + "-fx-background-radius: 8;"
+                + "-fx-cursor: hand;"
+        );
+
+        closeButton.setStyle(
+                "-fx-background-color: #b83b3b;"
+                + "-fx-text-fill: white;"
+                + "-fx-font-size: 16px;"
+                + "-fx-font-weight: bold;"
+                + "-fx-background-radius: 8;"
+                + "-fx-cursor: hand;"
+        );
+
+        minimizeButton.setOnAction(e -> primaryStage.setIconified(true));
+        closeButton.setOnAction(e -> primaryStage.close());
+
+        titleBar.getChildren().addAll(
+                title,
+                titleSpace,
+                minimizeButton,
+                closeButton
+        );
+
+        titleBar.setOnMousePressed(e -> {
+            dragOffsetX = e.getSceneX();
+            dragOffsetY = e.getSceneY();
+        });
+
+        titleBar.setOnMouseDragged(e -> {
+            primaryStage.setX(e.getScreenX() - dragOffsetX);
+            primaryStage.setY(e.getScreenY() - dragOffsetY);
+        });
+
+        VBox top = new VBox(titleBar, display);
+        top.setPadding(new Insets(0, 12, 0, 12));
+
+        root.setTop(top);
         root.setCenter(grid);
 
         Scene scene = new Scene(
@@ -83,21 +177,22 @@ public class Calculator extends Application {
                 560
         );
 
-        Rectangle back = new Rectangle(
-                0,
-                0,
-                scene.getWidth(),
-                scene.getHeight()
-        );
+        scene.setFill(Color.TRANSPARENT);
 
         calc();
 
-        back.setFill(Color.BLACK);
-        root.getChildren().add(back);
-        back.toBack();
-
         primaryStage.setTitle("Calculator");
         primaryStage.setScene(scene);
+        primaryStage.setResizable(false);
+
+        primaryStage.getIcons().add(
+                new Image(
+                        getClass().getResourceAsStream(
+                                "calc.png"
+                        )
+                )
+        );
+
         primaryStage.show();
     }
 
@@ -410,7 +505,7 @@ public class Calculator extends Application {
                 display.setFont(Font.font(
                         "Arial",
                         FontWeight.BOLD,
-                        19
+                        16
                 ));
 
                 display.setAlignment(
